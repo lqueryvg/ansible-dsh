@@ -1,0 +1,7 @@
+[all]
+host1 ansible_port=32001
+host2 ansible_port=32002
+host3 ansible_port=32003
+host4 ansible_port=32004
+host5 ansible_port=32005
+host6 ansible_port=32006

@@ -1,0 +1,14 @@
+---
+- name: test
+  hosts: all
+  gather_facts: False
+
+  tasks:
+
+  - shell: head /etc/passwd
+
+  - shell: echo hello
+
+  - stat: path=/etc/passwd
+
+  - shell: head /etc/passwd

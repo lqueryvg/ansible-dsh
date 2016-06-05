@@ -1,0 +1,62 @@
+#!/bin/bash
+
+export LANG=C
+
+test_unreachable() {
+  echo "Note: UNREACHABLE below is expected."
+  count=$(ansible -i hosts all -m ping | tee /dev/tty |
+    grep "^host6: UNREACHABLE" | wc -l)
+  assertEquals 1 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+test_failing_module() {
+  echo "Note: ERRORs below are expected."
+  count=$(ansible -i hosts all -m user -a "name=wibble uid=-1" | tee /dev/tty |
+    grep -v "^host[1-5]: ERROR: rc=3" | wc -l)
+  assertEquals 1 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+test_successful_shell() {
+  count=$(ansible -i hosts all -m shell -a "cat /etc/passwd | grep :root:" |
+    tee /dev/tty | grep -v "^host[1-5]: root:" | wc -l)
+  assertEquals 1 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+test_script_success() {
+  count=$(ansible -i hosts all -m script -a works.sh |
+    tee /dev/tty | grep "^host[1-5]: works" | wc -l)
+  assertEquals 5 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+test_script_fail() {
+  count=$(ansible -i hosts all -m script -a fails.sh |
+    tee /dev/tty | grep "^host[1-5]: ERROR: rc=1: fails" | wc -l)
+  assertEquals 5 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+test_successful_module() {
+  count=$(ansible -i hosts all -m ping |
+    tee /dev/tty | grep -v "^host[1-5]: " | wc -l)
+  assertEquals 1 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+test_command_not_found() {
+  count=$(ansible -i hosts all -m command -a "wibble" |
+    tee /dev/tty | grep -v "^host[1-5]: ERROR: " | wc -l)
+  assertEquals 1 $count
+  [[ $? == 1 ]] && exitStatus=1
+}
+
+shunit=/tmp/shunit2-2.0.3/src/shell/shunit2
+[[ -r $shunit ]] || exit 1
+
+. $shunit
+
+exit $exitStatus
+
