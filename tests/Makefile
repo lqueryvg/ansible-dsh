@@ -11,6 +11,7 @@ test: clean build
 	echo host3 ansible_port=32003 >> hosts
 	echo host4 ansible_port=32004 >> hosts
 	echo host5 ansible_port=32005 >> hosts
+	echo host6 ansible_port=32006 >> hosts  # intentional unreachable
 
 	ansible-playbook -i hosts test.yml
 
